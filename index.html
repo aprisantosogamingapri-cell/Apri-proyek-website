@@ -1,15 +1,198 @@
-<!DOCTYPE html>
+   <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Pertama Saya</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Game Berhitung Cepat</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #74b9ff, #a29bfe);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .game-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+            width: 320px;
+        }
+        h1 {
+            color: #2d3436;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #636e72;
+        }
+        .question-box {
+            font-size: 36px;
+            margin: 20px 0;
+            color: #0984e3;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            width: 80%;
+            padding: 10px;
+            font-size: 20px;
+            text-align: center;
+            border: 2px solid #dfe6e9;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            outline: none;
+        }
+        input[type="number"]:focus {
+            border-color: #0984e3;
+        }
+        button {
+            background-color: #00b894;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #00a885;
+        }
+        .game-over {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <h1>Asu</h1>
-    <p>play </p>
+
+<div class="game-container">
+    <h1>Game Berhitung</h1>
+    
+    <div id="game-screen">
+        <div class="stats">
+            <span>Skor: <strong id="score">0</strong></span>
+            <span>Waktu: <strong id="timer">10</strong>s</span>
+        </div>
+        
+        <div class="question-box" id="question">5 + 3</div>
+        
+        <form id="answer-form" onsubmit="checkAnswer(event)">
+            <input type="number" id="answer-input" placeholder="Jawaban" autocomplete="off" required>
+            <button type="submit" id="submit-btn">Kirim</button>
+        </form>
+    </div>
+
+    <div id="game-over-screen" class="game-over">
+        <h2>Waktu Habis! 🎮</h2>
+        <p>Skor Akhir Kamu:</p>
+        <h1 id="final-score" style="color: #d63031;">0</h1>
+        <button onclick="startGame()">Main Lagi</button>
+    </div>
+</div>
+
+<script>
+    let score = 0;
+    let timeLeft = 10;
+    let timerInterval;
+    let correctAnswer = 0;
+
+    const scoreDisplay = document.getElementById('score');
+    const timerDisplay = document.getElementById('timer');
+    const questionDisplay = document.getElementById('question');
+    const answerInput = document.getElementById('answer-input');
+    const gameScreen = document.getElementById('game-screen');
+    const gameOverScreen = document.getElementById('game-over-screen');
+    const finalScoreDisplay = document.getElementById('final-score');
+
+    function startGame() {
+        score = 0;
+        scoreDisplay.textContent = score;
+        gameScreen.style.display = 'block';
+        gameOverScreen.style.display = 'none';
+        nextQuestion();
+    }
+
+    function generateQuestion() {
+        let maxNum = 10 + Math.floor(score / 5) * 5; 
+        const operators = ['+', '-', '*'];
+        const op = operators[Math.floor(Math.random() * operators.length)];
+        
+        let num1 = Math.floor(Math.random() * maxNum) + 1;
+        let num2 = Math.floor(Math.random() * maxNum) + 1;
+
+        if (op === '-' && num1 < num2) {
+            let temp = num1;
+            num1 = num2;
+            num2 = temp;
+        }
+
+        if (op === '+') correctAnswer = num1 + num2;
+        if (op === '-') correctAnswer = num1 - num2;
+        if (op === '*') {
+            num1 = Math.floor(Math.random() * 10) + 1;
+            num2 = Math.floor(Math.random() * 10) + 1;
+            correctAnswer = num1 * num2;
+        }
+
+        questionDisplay.textContent = `${num1} ${op} ${num2}`;
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        timeLeft = 30;  
+        timerDisplay.textContent = timeLeft;
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerDisplay.textContent = timeLeft;
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                endGame();
+            }
+        }, 1000);
+    }
+
+    function nextQuestion() {
+        generateQuestion();
+        answerInput.value = '';
+        answerInput.focus();
+        startTimer();
+    }
+
+    function checkAnswer(event) {
+        event.preventDefault();
+        const userAnswer = parseInt(answerInput.value);
+
+        if (userAnswer === correctAnswer) {
+            score += 1;
+            scoreDisplay.textContent = score;
+            nextQuestion();
+        } else {
+            timeLeft = Math.max(0, timeLeft - 2);
+            answerInput.value = '';
+            answerInput.style.borderColor = '#d63031';
+            setTimeout(() => { answerInput.style.borderColor = '#dfe6e9'; }, 300);
+        }
+    }
+
+    function endGame() {
+        gameScreen.style.display = 'none';
+        gameOverScreen.style.display = 'block';
+        finalScoreDisplay.textContent = score;
+    }
+
+    startGame();
+</script>
+
 </body>
 </html>
-
-<img src="Desain tanpa judul.png">
